@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "strict": true,
+    "module": "esnext",
+    "target": "es2015",
+    "jsx": "react",
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "Node",
+    "types": ["react/next", "react-dom/next"],
+    "lib": ["es2017", "dom"]
+  }
+}
