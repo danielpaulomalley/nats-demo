@@ -21,4 +21,5 @@ export interface ChatMessage {
   fromId: string
   message: string
   ts: number
+  fromName?: string
 }

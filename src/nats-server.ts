@@ -37,9 +37,33 @@ class NATSServer {
     })
   }
 
+
+
+  respond(msg: Msg, data: string) {
+    msg.respond(sc.encode(data))
+  }
+
+  publish(subject: string, msg: string, reply?: string) {
+    if (!this.nc) throw new Error("not connected")
+    this.nc.publish(subject, sc.encode(msg), {reply})
+  }
+
+  request() {
+    if (!this.nc) throw new Error("not connected")
+    //this.nc.request().then((v) => {}, () => {})
+    //this.nc.publish()
+
+  }
+
+  requestMany(subject: string, msg: string) {
+    if (!this.nc) throw new Error("not connected")
+    return this.nc.requestMany(subject, sc.encode(msg), {maxWait: 1000})
+  }
+
   reset() {
     if (!this.nc) throw new Error("not connected")
     this.state$.next("connecting")
+    this._alreadyListening = {}
     this.nc.close()
       .then(() => {
         delete this.nc
@@ -62,27 +86,6 @@ class NATSServer {
         this.state$.next("error")
         console.error(e)
       })
-  }
-
-  respond(msg: Msg, data: string) {
-    msg.respond(sc.encode(data))
-  }
-
-  publish(subject: string, msg: string, reply?: string) {
-    if (!this.nc) throw new Error("not connected")
-    this.nc.publish(subject, sc.encode(msg), {reply})
-  }
-
-  request() {
-    if (!this.nc) throw new Error("not connected")
-    //this.nc.request().then((v) => {}, () => {})
-    //this.nc.publish()
-
-  }
-
-  requestMany(subject: string, msg: string) {
-    if (!this.nc) throw new Error("not connected")
-    return this.nc.requestMany(subject, sc.encode(msg), {maxWait: 1000})
   }
 
 }
