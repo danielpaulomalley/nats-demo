@@ -19,9 +19,9 @@ const ChatDemo = () => {
 
   useEffect(() => {
     if (!currentUser) {
-      setTimeout(() => {
+      /*setTimeout(() => {
         registerUser("dan")
-      }, 3000)
+      }, 3000)*/
       return
     }
 
@@ -29,12 +29,7 @@ const ChatDemo = () => {
     SelectedChat = "all"
     UserMap = {}
     UserMap[currentUser.id] = currentUser.name
-    server.subscribe("chat.message.all")
-    server.subscribe("chat.user_enter")
-    server.subscribe("chat.user_leave")
-    server.subscribe("chat.get_users")
-    server.subscribe(`chat.message.${currentUser.id}`)
-    server.publish("chat.user_enter", JSON.stringify(currentUser))
+
     const s = server.messageRecd$.subscribe(m => {
       switch (m.subscriptionSubject) {
         case 'chat.message.all': {
@@ -45,14 +40,11 @@ const ChatDemo = () => {
         }
         case 'chat.user_enter': {
           const user = JSON.parse(m.message) as UserData
-          if (!AllChats[user.id]) {
-            UserMap[user.id] = user.name
-            AllChats[user.id] = {chatName: user.name, id: user.id, messages: []}
-            setChats({...AllChats})
-          }
+          _addUser(user)
           break
         }
         case 'chat.user_leave': {
+          console.log(123)
           const userId = m.message
           if (AllChats[userId]) {
             if (SelectedChat == userId) {
@@ -65,6 +57,13 @@ const ChatDemo = () => {
           break
         }
         case 'chat.get_users': {
+          if (m.message != currentUser.id)
+            server.publish(`chat.get_users.${m.message}`, JSON.stringify(currentUser))
+          break
+        }
+        case `chat.get_users.${currentUser.id}`: {
+          const user = JSON.parse(m.message) as UserData
+          _addUser(user)
           break
         }
         case `chat.message.${currentUser.id}`: {
@@ -74,11 +73,30 @@ const ChatDemo = () => {
         }
       }
     })
+    server.subscribe("chat.message.all")
+    server.subscribe("chat.user_enter")
+    server.subscribe("chat.user_leave")
+    server.subscribe("chat.get_users")
+    server.subscribe(`chat.message.${currentUser.id}`)
+    server.subscribe(`chat.get_users.${currentUser.id}`)
+    server.publish("chat.user_enter", JSON.stringify(currentUser))
+    server.publish("chat.get_users", currentUser.id)
     return () => {
       s.unsubscribe()
-      server.reset()
+      server.publish("chat.user_leave", currentUser.id)
+      setTimeout(() => {
+        server.reset()
+      }, 500)
     }
   }, [currentUser])
+
+  const _addUser = (user: UserData) => {
+    if (!AllChats[user.id]) {
+      UserMap[user.id] = user.name
+      AllChats[user.id] = {chatName: user.name, id: user.id, messages: []}
+      setChats({...AllChats})
+    }
+  }
 
   const _addMessageToChat = (id: string, msg: ChatMessage) => {
     const cht = AllChats[id]

@@ -38,14 +38,9 @@ class NATSServer {
   }
 
 
-
-  respond(msg: Msg, data: string) {
-    msg.respond(sc.encode(data))
-  }
-
-  publish(subject: string, msg: string, reply?: string) {
+  publish(subject: string, msg: string) {
     if (!this.nc) throw new Error("not connected")
-    this.nc.publish(subject, sc.encode(msg), {reply})
+    this.nc.publish(subject, sc.encode(msg))
   }
 
   request() {
@@ -57,7 +52,10 @@ class NATSServer {
 
   requestMany(subject: string, msg: string) {
     if (!this.nc) throw new Error("not connected")
-    return this.nc.requestMany(subject, sc.encode(msg), {maxWait: 1000})
+    this.nc.requestMany(subject, sc.encode(msg), {maxWait: 1000}).then(v => {
+      const x = v as any
+      console.log(x.yields.length)
+    })
   }
 
   reset() {
@@ -77,7 +75,7 @@ class NATSServer {
 
   private _connect() {
     if (this.nc) throw new Error("already connected")
-    connect({servers: "ws://nats-ws.amag.dev"})
+    connect({servers: "wss://nats-ws.amag.dev"})
       .then(n => {
         this.nc = n
         this.state$.next("connected")
