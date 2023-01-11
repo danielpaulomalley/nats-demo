@@ -12,54 +12,38 @@ const colors = [
   "#FF0000", "#FC6404", "#FCD444", "#8CC43C", "#FC4444",
   "#029658", "#5BC0DE", "#6454AC", "#FC8C84", "#1ABC9C"
 ]
+let AllMessages: MessagesMessage[] = []
+let ColorMap: {[subject: string]: string} = {} // all subjects subscribed to and corresponding color
 
 const PubSubDemo = () => {
-  const [subs] = useState<Subscription[]>([])
   const [messages, setMessages] = useState<MessagesMessage[]>([])
   const [subscriptions, setSubscriptions] = useState<{key: string, color: string}[]>([])
-  const [colorMap] = useState<{[key: string]: string}>({})
+
   useEffect(() => {
+    AllMessages = []
+    ColorMap = {}
+    const s = server.messageRecd$.subscribe(m => {
+      if (!ColorMap[m.subscriptionSubject]) return
+      const msg = {...m, color: ColorMap[m.subscriptionSubject]}
+      AllMessages.unshift(msg)
+      setMessages([...AllMessages])
+    })
     return () => {
-      console.log(subs.length)
-      for (const s of subs) s.unsubscribe()
+      s.unsubscribe()
+      server.reset()
     }
-  }, [subs])
+  }, [])
 
   const publish = (msg: PublishMessage) => {
-    server.publish(msg)
+    server.publish(msg.subject, msg.message)
   }
-/*
-  const [subscribe] = useState(() => {
-    return (subject: string) => {
-      let c = ""
-      if (colorMap[subject]) c = colorMap[subject]
-      else {
-        c = colors[Object.keys(colorMap).length % colors.length]
-        colorMap[subject] = c
-      }
-      subscriptions.push({key: subject, color: c})
-      setSubscriptions([...subscriptions])
-      //setSubscriptions([...subscriptions, {key: subject, color: c}])
-      subs.push(server.subscribe(subject).subscribe(msg => {
-        const m = {...msg, color: colorMap[msg.subscriptionSubject]}
-        messages.push(m)
-        setMessages([...messages])
-      }))
-    }
-  })
-*/
+
   const subscribe = (subject: string) => {
-    if (colorMap[subject]) return
-    const c = colors[Object.keys(colorMap).length % colors.length]
-    colorMap[subject] = c
-    subscriptions.push({key: subject, color: c})
-    setSubscriptions([...subscriptions])
-    //setSubscriptions([...subscriptions, {key: subject, color: c}])
-    subs.push(server.subscribe(subject).subscribe(msg => {
-      const m = {...msg, color: colorMap[msg.subscriptionSubject]}
-      messages.unshift(m)
-      setMessages([...messages])
-    }))
+    if (ColorMap[subject]) return
+    const c = colors[Object.keys(ColorMap).length % colors.length]
+    ColorMap[subject] = c
+    setSubscriptions([{key: subject, color: c}, ...subscriptions])
+    server.subscribe(subject)
   }
   return (
     <Wrapper>

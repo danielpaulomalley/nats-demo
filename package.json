@@ -19,6 +19,7 @@
     "@types/react-dom": "^18.0.10",
     "@types/styled-components": "^5.1.26",
     "@types/tinycolor2": "^1.4.3",
+    "@types/uuid": "^9.0.0",
     "css-loader": "^6.7.3",
     "html-webpack-plugin": "^5.5.0",
     "nats.ws": "^1.11.2",
@@ -39,6 +40,7 @@
   },
   "dependencies": {
     "rxjs": "^7.8.0",
-    "tinycolor2": "^1.5.2"
+    "tinycolor2": "^1.5.2",
+    "uuid": "^9.0.0"
   }
 }

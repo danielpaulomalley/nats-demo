@@ -47,9 +47,8 @@ const Wrapper = styled.div`
       text-decoration: none;
       padding: 5px;
       color: inherit;
-      &:hover {
-
-      }
+      &:hover { background: green; }
+      &.active { background: green; }
     }
   }
   .app-body-div { flex-grow: 1; }

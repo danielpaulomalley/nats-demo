@@ -18,25 +18,3 @@ const Root = () => {
   )
 }
 ReactDOM.createRoot(document.getElementById("root")!).render(<Root/>)
-/*const Root = () => {
-  const [nc, setConnection] = useState(undefined)
-  useState(() => {
-    if (!nc) {
-      connect({servers: "ws://nats-ws.amag.dev"})
-      //connect({servers: "ws://10.10.100.51:9090"})
-        .then((nc) => {
-          //setConnection(nc)
-        })
-        .catch((e) => {
-          console.log(e.chainedError)
-          console.log("could not connect")
-        })
-    }
-  })
-  return (
-    <div>
-      hello
-    </div>
-  )
-}
-ReactDOM.createRoot(document.getElementById("root")!).render(<Root/>)*/
